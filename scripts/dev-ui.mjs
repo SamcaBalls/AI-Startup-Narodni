@@ -1,12 +1,7 @@
 import { createServer } from "vite";
+import { createUiViteConfig } from "./ui-vite-config.mjs";
 
-const server = await createServer({
-  configFile: false,
-  server: {
-    host: "127.0.0.1",
-    port: 4173,
-  },
-});
+const server = await createServer(createUiViteConfig());
 
 await server.listen();
 server.printUrls();
