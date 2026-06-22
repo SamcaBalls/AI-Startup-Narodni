@@ -1,5 +1,6 @@
 import { useCallback, useReducer } from "react";
 import { dataset } from "./dataset.js";
+import { createDemoPaperEdit } from "./demo-paper-edits.mjs";
 import { createInitialState, getSelectedPaper, reducer } from "./state.js";
 import { createModelProvider } from "./model-provider.mjs";
 import PaperRail from "./components/PaperRail.jsx";
@@ -19,6 +20,25 @@ export default function App() {
       if (!text || !paper) return;
 
       dispatch({ type: "PUSH_MESSAGE", paperId, message: { role: "user", text } });
+
+      const intent = state.runtimeDataset.intents.find((item) => item.id === state.company.id);
+      const demoEdit = createDemoPaperEdit({
+        question: text,
+        document: paper,
+        company: state.company.profile,
+        intent,
+        agentRun: state.agentRun,
+      });
+
+      if (demoEdit) {
+        dispatch({ type: "EDIT_BODY", id: paperId, body: demoEdit.body });
+        dispatch({
+          type: "PUSH_MESSAGE",
+          paperId,
+          message: { role: "agent", text: demoEdit.answer },
+        });
+        return;
+      }
 
       const provider = createModelProvider({ mode: state.providerMode });
       const reply = await provider.assist({
