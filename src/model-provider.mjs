@@ -13,6 +13,9 @@ export function createModelProvider(options = {}) {
     async explain(context) {
       return fallbackExplanation(context);
     },
+    async assist(context) {
+      return fallbackAssist(context);
+    },
   };
 }
 
@@ -21,45 +24,47 @@ function createOllamaProvider(options) {
   const model = options.model ?? DEFAULT_MODEL;
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
 
+  async function runGenerate(context, buildPromptFn, fallbackFn) {
+    if (typeof fetchImpl !== "function") {
+      return fallbackFn(context, "fetch API není dostupné");
+    }
+
+    try {
+      const response = await fetchImpl(`${endpoint}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          stream: false,
+          format: "json",
+          prompt: buildPromptFn(context),
+          options: {
+            temperature: 0.15,
+            top_p: 0.8,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Ollama HTTP ${response.status}`);
+      }
+
+      const payload = await response.json();
+      return { answer: parseOllamaResponse(payload.response), source: "ollama", model };
+    } catch (error) {
+      return fallbackFn(context, error.message);
+    }
+  }
+
   return {
     mode: "ollama",
     model,
     endpoint,
-    async explain(context) {
-      if (typeof fetchImpl !== "function") {
-        return fallbackExplanation(context, "fetch API není dostupné");
-      }
-
-      try {
-        const response = await fetchImpl(`${endpoint}/api/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model,
-            stream: false,
-            format: "json",
-            prompt: buildPrompt(context),
-            options: {
-              temperature: 0.15,
-              top_p: 0.8,
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Ollama HTTP ${response.status}`);
-        }
-
-        const payload = await response.json();
-        const answer = parseOllamaResponse(payload.response);
-        return {
-          answer,
-          source: "ollama",
-          model,
-        };
-      } catch (error) {
-        return fallbackExplanation(context, error.message);
-      }
+    explain(context) {
+      return runGenerate(context, buildPrompt, fallbackExplanation);
+    },
+    assist(context) {
+      return runGenerate(context, buildAssistPrompt, fallbackAssist);
     },
   };
 }
@@ -78,6 +83,50 @@ function buildPrompt(context) {
     `Důvod z pravidel: ${obligation.reason ?? ""}`,
     `Otázka uživatele: ${question}`,
   ].join("\n");
+}
+
+function buildAssistPrompt(context) {
+  const company = context.company ?? {};
+  const document = context.document ?? {};
+  const companyName = company.nazev?.value ?? "vybraná firma";
+  const sidlo = company.sidlo?.value ?? "";
+  const predmet = company.predmet?.value ?? "";
+  const question = context.question ?? "Pomoz mi s dokumentem.";
+
+  return [
+    "Jsi asistent pro veřejnou správu, který pomáhá firmě s úředními dokumenty (návrhy smluv, žádosti, ohlášení).",
+    "Můžeš dokument upravit, doplnit z veřejně známých údajů firmy nebo poradit. Nevydávej závaznou právní radu.",
+    "Odpovídej stručně, česky a srozumitelně. Vrať JSON ve tvaru {\"answer\":\"...\"}.",
+    `Firma: ${companyName}${sidlo ? `, sídlo ${sidlo}` : ""}${predmet ? `, předmět ${predmet}` : ""}`,
+    `Dokument: ${document.title ?? "bez názvu"}`,
+    `Obsah dokumentu:\n${(document.body ?? "").slice(0, 1500)}`,
+    `Požadavek uživatele: ${question}`,
+  ].join("\n");
+}
+
+function fallbackAssist(context, errorMessage = "") {
+  const company = context.company ?? {};
+  const document = context.document ?? {};
+  const companyName = company.nazev?.value ?? "vaše firma";
+  const sidlo = company.sidlo?.value ?? "";
+  const predmet = company.predmet?.value ?? "";
+  const title = document.title ?? "dokument";
+  const facts = [
+    `firma ${companyName}`,
+    sidlo ? `sídlo ${sidlo}` : "",
+    predmet ? `předmět ${predmet}` : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
+  const suffix = errorMessage
+    ? ` Model zatím není připojen (${errorMessage}), proto běží šablonová odpověď.`
+    : "";
+
+  return {
+    answer: `K dokumentu „${title}": pracuji s veřejně známými údaji (${facts}). Návrh doplnění a úprav připravím jako podklad ke kontrole člověkem, ne jako závaznou právní radu.${suffix}`,
+    source: "fallback-template",
+    model: "none",
+  };
 }
 
 function parseOllamaResponse(responseText) {

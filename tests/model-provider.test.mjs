@@ -41,3 +41,39 @@ test("ollama provider posts a compact prompt and falls back when the model is un
   assert.match(explanation.answer, /Oznaceni sidla/);
   assert.equal(explanation.source, "fallback-template");
 });
+
+test("mock provider assist references the document and company in a template answer", async () => {
+  const provider = createModelProvider();
+  const result = await provider.assist({
+    question: "Dopln z ARES",
+    document: { title: "Spolecenska smlouva", body: "Sidlo: [doplnit]" },
+    company: { nazev: { value: "Zamer 2 s.r.o." }, sidlo: { value: "Hlavni 181, Brno" } },
+  });
+
+  assert.equal(provider.mode, "mock");
+  assert.match(result.answer, /Spolecenska smlouva/);
+  assert.match(result.answer, /Zamer 2 s\.r\.o\./);
+  assert.equal(result.source, "fallback-template");
+});
+
+test("ollama provider assist posts the assist prompt and falls back when unreachable", async () => {
+  const calls = [];
+  const provider = createModelProvider({
+    mode: "ollama",
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      throw new Error("connection refused");
+    },
+  });
+
+  const result = await provider.assist({
+    question: "Zkontroluj dokument",
+    document: { title: "Ohlaseni zivnosti", body: "Predmet: [doplnit]" },
+    company: { nazev: { value: "Zamer 2 s.r.o." } },
+  });
+
+  assert.equal(calls.length, 1);
+  assert.match(calls[0].options.body, /Ohlaseni zivnosti/);
+  assert.match(result.answer, /Ohlaseni zivnosti/);
+  assert.equal(result.source, "fallback-template");
+});
