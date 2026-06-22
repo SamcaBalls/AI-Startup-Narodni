@@ -283,9 +283,26 @@ function renderObligationDetail(obligation) {
       <div><dt>Jistota</dt><dd>${confidenceLabel(obligation.confidence)}</dd></div>
       <div><dt>Human-in-the-loop</dt><dd>${obligation.requiresHumanApproval ? "vyžaduje potvrzení" : "jen baseline výstup"}</dd></div>
       <div><dt>Zdroje</dt><dd>${obligation.sources.map((source) => `<span>${escapeHtml(source)}</span>`).join("")}</dd></div>
+      <div><dt>Právní opora</dt><dd>${renderLegalEvidence(obligation.legalEvidence)}</dd></div>
     </dl>
     <p class="legal-note">Výstup je podklad, ne závazná právní rada. Produkční verze musí ověřit aktuální znění předpisů.</p>
   `;
+}
+
+function renderLegalEvidence(legalEvidence = []) {
+  if (!legalEvidence.length) {
+    return "<span>demo opora není přiřazena</span>";
+  }
+
+  return legalEvidence
+    .map(
+      (source) => `
+        <a href="${escapeHtml(source.sourceUrl)}" target="_blank" rel="noreferrer">
+          ${escapeHtml(source.actNumber)} · ${escapeHtml(source.sectionHint)}
+        </a>
+      `,
+    )
+    .join("");
 }
 
 function renderEmptyDetail() {
@@ -602,8 +619,7 @@ async function explainSelected(question) {
   state.messages.push({ role: "user", text: question });
   render();
 
-  const provider = createModelProvider({ mode: state.providerMode });
-  const explanation = await provider.explain({
+  const explanation = await requestExplanation({
     question,
     obligation,
     company: state.profile,
@@ -611,6 +627,32 @@ async function explainSelected(question) {
   });
   state.messages.push({ role: "agent", text: explanation.answer });
   render();
+}
+
+async function requestExplanation(context) {
+  if (state.providerMode === "ollama") {
+    try {
+      const response = await fetch("./api/agent/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...context, providerMode: "ollama" }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      return createModelProvider({ mode: "mock" }).explain({
+        ...context,
+        question: `${context.question} (server/Ollama nedostupny: ${error.message})`,
+      });
+    }
+  }
+
+  const provider = createModelProvider({ mode: state.providerMode });
+  return provider.explain(context);
 }
 
 function updateObligationStatus(code, status) {

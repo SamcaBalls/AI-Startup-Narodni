@@ -117,6 +117,31 @@ test("createAgentRun derives hidden and delayed obligations for the e-shop case"
   );
 });
 
+test("createAgentRun attaches legal evidence to each obligation for auditability", () => {
+  const result = createAgentRun("FIRMA-0002", fixtures);
+  const dph = result.obligations.find((obligation) => obligation.code === "DPH");
+  const trade = result.obligations.find((obligation) => obligation.code === "ZIVNOST_VOLNA");
+  const dphLegislationCall = result.toolCalls.find((call) => call.tool === "lookup_legislation" && call.args.tema === "dph");
+
+  assert.ok(dph.legalEvidence.length > 0);
+  assert.equal(dph.legalEvidence[0].actNumber, "235/2004 Sb.");
+  assert.match(dph.legalEvidence[0].actName, /dani z pridane hodnoty/i);
+  assert.match(dph.legalEvidence[0].verificationNote, /overit aktualni zneni/i);
+  assert.equal(dph.legalEvidence[0].sourceUrl, "https://www.zakonyprolidi.cz/cs/2004-235");
+
+  assert.ok(trade.legalEvidence.some((source) => source.actNumber === "455/1991 Sb."));
+  assert.equal(dphLegislationCall.result.legalEvidence[0].actNumber, "235/2004 Sb.");
+  assert.equal(dphLegislationCall.result.legalEvidence[0].sourceUrl, "https://www.zakonyprolidi.cz/cs/2004-235");
+  assert.ok(
+    result.obligations.every(
+      (obligation) =>
+        Array.isArray(obligation.legalEvidence) &&
+        obligation.legalEvidence.length > 0 &&
+        obligation.legalEvidence.every((source) => source.status === "demo_reference"),
+    ),
+  );
+});
+
 test("createAgentRun classifies accounting as a regulated trade and avoids the free trade false positive", () => {
   const result = createAgentRun("FIRMA-0001", fixtures);
 

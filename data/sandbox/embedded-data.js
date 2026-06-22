@@ -1308,5 +1308,143 @@ window.FIRMGUARD_DATA = {
       "nazev": "Partner Holding 23 s.r.o.",
       "aktivni": true
     }
+  },
+  "legalEvidence": {
+    "OR_ZAPIS": [
+      {
+        "actNumber": "90/2012 Sb.",
+        "actName": "Zakon o obchodnich korporacich",
+        "sectionHint": "zalozeni a vznik obchodni korporace",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2012-90",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      },
+      {
+        "actNumber": "304/2013 Sb.",
+        "actName": "Zakon o verejnych rejstricich pravnickych a fyzickych osob",
+        "sectionHint": "obchodni rejstrik",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2013-304",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "DPPO": [
+      {
+        "actNumber": "586/1992 Sb.",
+        "actName": "Zakon o danich z prijmu",
+        "sectionHint": "dan z prijmu pravnickych osob",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1992-586",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "DATOVKA": [
+      {
+        "actNumber": "300/2008 Sb.",
+        "actName": "Zakon o elektronickych ukonech a autorizovane konverzi dokumentu",
+        "sectionHint": "datove schranky pravnickych osob",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2008-300",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "ZIVNOST_VOLNA": [
+      {
+        "actNumber": "455/1991 Sb.",
+        "actName": "Zivnostensky zakon",
+        "sectionHint": "ohlasovaci zivnosti a druhy zivnosti",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1991-455",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "ZIVNOST_VAZANA": [
+      {
+        "actNumber": "455/1991 Sb.",
+        "actName": "Zivnostensky zakon",
+        "sectionHint": "vazane zivnosti a odborna zpusobilost",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1991-455",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "ZIVNOST_KONCESE": [
+      {
+        "actNumber": "455/1991 Sb.",
+        "actName": "Zivnostensky zakon",
+        "sectionHint": "koncesovane zivnosti",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1991-455",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "SIDLO_OZNACENI": [
+      {
+        "actNumber": "455/1991 Sb.",
+        "actName": "Zivnostensky zakon",
+        "sectionHint": "oznaceni objektu, v nemz ma podnikatel sidlo",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1991-455",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "SKUTECNI_MAJITELE": [
+      {
+        "actNumber": "37/2021 Sb.",
+        "actName": "Zakon o evidenci skutecnych majitelu",
+        "sectionHint": "evidence skutecnych majitelu",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2021-37",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "DPH": [
+      {
+        "actNumber": "235/2004 Sb.",
+        "actName": "Zakon o dani z pridane hodnoty",
+        "sectionHint": "registrace k DPH a obrat",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2004-235",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "ZAM_CSSZ": [
+      {
+        "actNumber": "589/1992 Sb.",
+        "actName": "Zakon o pojistnem na socialni zabezpeceni a prispevku na statni politiku zamestnanosti",
+        "sectionHint": "zamestnavatel a pojistne",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1992-589",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      },
+      {
+        "actNumber": "187/2006 Sb.",
+        "actName": "Zakon o nemocenskem pojisteni",
+        "sectionHint": "ucast zamestnancu na nemocenskem pojisteni",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/2006-187",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "ZAM_ZP": [
+      {
+        "actNumber": "592/1992 Sb.",
+        "actName": "Zakon o pojistnem na verejne zdravotni pojisteni",
+        "sectionHint": "odvod pojistneho zamestnavatelem",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1992-592",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ],
+    "PROVOZOVNA": [
+      {
+        "actNumber": "455/1991 Sb.",
+        "actName": "Zivnostensky zakon",
+        "sectionHint": "provozovna, oznameni a oznaceni provozovny",
+        "sourceUrl": "https://www.zakonyprolidi.cz/cs/1991-455",
+        "status": "demo_reference",
+        "verificationNote": "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf."
+      }
+    ]
   }
 };

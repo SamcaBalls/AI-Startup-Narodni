@@ -31,37 +31,96 @@ function createOllamaProvider(options) {
       }
 
       try {
-        const response = await fetchImpl(`${endpoint}/api/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model,
-            stream: false,
-            format: "json",
-            prompt: buildPrompt(context),
-            options: {
-              temperature: 0.15,
-              top_p: 0.8,
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Ollama HTTP ${response.status}`);
+        return await explainWithModel({ fetchImpl, endpoint, model, context });
+      } catch (error) {
+        if (isMissingModel(error)) {
+          const discoveredModel = await discoverQwenModel(fetchImpl, endpoint, model);
+          if (discoveredModel && discoveredModel !== model) {
+            try {
+              return await explainWithModel({ fetchImpl, endpoint, model: discoveredModel, context });
+            } catch (retryError) {
+              return fallbackExplanation(context, retryError.message);
+            }
+          }
         }
 
-        const payload = await response.json();
-        const answer = parseOllamaResponse(payload.response);
-        return {
-          answer,
-          source: "ollama",
-          model,
-        };
-      } catch (error) {
         return fallbackExplanation(context, error.message);
       }
     },
   };
+}
+
+async function explainWithModel({ fetchImpl, endpoint, model, context }) {
+  const response = await fetchImpl(`${endpoint}/api/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model,
+      stream: false,
+      format: "json",
+      prompt: buildPrompt(context),
+      options: {
+        temperature: 0.15,
+        top_p: 0.8,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const error = new Error(`Ollama HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+
+  const payload = await response.json();
+  const answer = parseOllamaResponse(payload.response);
+  return {
+    answer,
+    source: "ollama",
+    model,
+  };
+}
+
+async function discoverQwenModel(fetchImpl, endpoint, preferredModel) {
+  try {
+    const response = await fetchImpl(`${endpoint}/api/tags`);
+    if (!response.ok) return "";
+
+    const payload = await response.json();
+    const models = Array.isArray(payload.models) ? payload.models : [];
+    const exact = models.find((item) => item.name === preferredModel || item.model === preferredModel);
+    if (exact) return exact.name ?? exact.model;
+
+    const qwen14 = models.find((item) => isQwen3(item) && isFourteenB(item));
+    if (qwen14) return qwen14.name ?? qwen14.model;
+
+    const qwen = models.find(isQwen3);
+    return qwen ? qwen.name ?? qwen.model : "";
+  } catch {
+    return "";
+  }
+}
+
+function isMissingModel(error) {
+  return error?.status === 404 || /model|not found|404/i.test(error?.message ?? "");
+}
+
+function isQwen3(item) {
+  const haystack = [
+    item.name,
+    item.model,
+    item.details?.family,
+    ...(Array.isArray(item.details?.families) ? item.details.families : []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes("qwen3");
+}
+
+function isFourteenB(item) {
+  return String(item.details?.parameter_size ?? item.name ?? item.model ?? "").includes("14");
 }
 
 function buildPrompt(context) {
@@ -72,7 +131,11 @@ function buildPrompt(context) {
   return [
     "Jsi lokální compliance agent pro demo založení s.r.o. v České republice.",
     "Nevydávej závaznou právní radu. Odpovídej stručně, česky a srozumitelně.",
-    "Vrať JSON ve tvaru {\"answer\":\"...\"}.",
+    "Drž se pouze dodaného kódu povinnosti a důvodu z pravidel. Nevymýšlej další právní výklady.",
+    "Pokud je kód DPH, mluv výhradně o dani z přidané hodnoty a hlídání obratu.",
+    "Odpověď má mít nejvýše dvě věty.",
+    "Nepoužívej <think> bloky ani skryté úvahy.",
+    "Vrať pouze validní JSON ve tvaru {\"answer\":\"...\"}.",
     `Firma: ${companyName}`,
     `Povinnost: ${obligation.code ?? "nezadaná"} - ${obligation.title ?? ""}`,
     `Důvod z pravidel: ${obligation.reason ?? ""}`,
@@ -85,18 +148,51 @@ function parseOllamaResponse(responseText) {
     throw new Error("Ollama vrátila prázdnou odpověď");
   }
 
+  const cleaned = stripThinking(String(responseText)).trim();
+  const candidates = [
+    cleaned,
+    unwrapMarkdownFence(cleaned),
+    extractJsonObject(cleaned),
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    const answer = parseAnswer(candidate);
+    if (answer) return answer;
+  }
+
+  if (cleaned) {
+    return cleaned;
+  }
+
+  throw new Error("Ollama odpověď nemá pole answer");
+}
+
+function parseAnswer(value) {
   try {
-    const parsed = JSON.parse(responseText);
+    const parsed = JSON.parse(value);
     if (typeof parsed.answer === "string" && parsed.answer.trim()) {
       return parsed.answer.trim();
     }
   } catch {
-    if (typeof responseText === "string" && responseText.trim()) {
-      return responseText.trim();
-    }
+    return "";
   }
 
-  throw new Error("Ollama odpověď nemá pole answer");
+  return "";
+}
+
+function stripThinking(value) {
+  return value.replace(/<think>[\s\S]*?<\/think>/gi, "");
+}
+
+function unwrapMarkdownFence(value) {
+  const fenced = value.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  return fenced?.[1]?.trim() ?? "";
+}
+
+function extractJsonObject(value) {
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  return start !== -1 && end > start ? value.slice(start, end + 1).trim() : "";
 }
 
 function fallbackExplanation(context, errorMessage = "") {

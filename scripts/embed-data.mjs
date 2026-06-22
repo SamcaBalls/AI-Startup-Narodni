@@ -9,6 +9,7 @@ const files = {
   classifications: "klasifikace_zivnosti.json",
   catalog: "katalog_povinnosti.json",
   ares: "registr_ares.json",
+  legalEvidence: "pravni_zdroje.json",
 };
 
 const payload = {};
