@@ -790,6 +790,53 @@ button {
   padding: 16px;
 }
 
+.agent-summary {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.summary-line.muted {
+  color: var(--ink-2);
+}
+
+.summary-line strong {
+  font-family: var(--mono);
+}
+
+.obligation-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.obligation-chips span {
+  padding: 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.summary-note {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .msg {
   max-width: 90%;
   padding: 10px 12px;

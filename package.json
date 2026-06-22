@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/dev-ui.mjs",
+    "build": "node scripts/build-ui.mjs",
     "preview": "vite preview",
+    "eval": "node scripts/evaluate-agent.mjs",
+    "eval:json": "node scripts/evaluate-agent.mjs --json",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

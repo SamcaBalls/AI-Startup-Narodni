@@ -1,4 +1,9 @@
-import { createCompanyProfile } from "./domain.mjs";
+import {
+  createAgentRun,
+  createBaselineRun,
+  createCompanyProfile,
+  scoreBatch,
+} from "./domain.mjs";
 
 // The app is a single logged-in company's workspace.
 const COMPANY_ID = "FIRMA-0002";
@@ -59,12 +64,19 @@ const SEED_PAPERS = [
 ];
 
 export function createInitialState(dataset) {
+  const profile = createCompanyProfile(COMPANY_ID, dataset);
+  const runtimeDataset = datasetWithProfile(dataset, COMPANY_ID, profile);
+
   return {
     dataset,
+    runtimeDataset,
     company: {
       id: COMPANY_ID,
-      profile: createCompanyProfile(COMPANY_ID, dataset),
+      profile,
     },
+    baselineRun: createBaselineRun(COMPANY_ID, runtimeDataset),
+    agentRun: createAgentRun(COMPANY_ID, runtimeDataset),
+    batchScore: scoreBatch(dataset),
     papers: SEED_PAPERS,
     selectedPaperId: SEED_PAPERS[0].id,
     settingsOpen: false,
@@ -120,14 +132,20 @@ export function reducer(state, action) {
     case "UPDATE_PROFILE_FIELD": {
       const field = state.company.profile[action.key];
       if (!field) return state;
+      const profile = {
+        ...state.company.profile,
+        [action.key]: { ...field, value: action.value, source: "uzivatel" },
+      };
+      const runtimeDataset = datasetWithProfile(state.dataset, state.company.id, profile);
+
       return {
         ...state,
+        runtimeDataset,
+        baselineRun: createBaselineRun(state.company.id, runtimeDataset),
+        agentRun: createAgentRun(state.company.id, runtimeDataset),
         company: {
           ...state.company,
-          profile: {
-            ...state.company.profile,
-            [action.key]: { ...field, value: action.value, source: "uzivatel" },
-          },
+          profile,
         },
       };
     }
@@ -138,4 +156,26 @@ export function reducer(state, action) {
     default:
       return state;
   }
+}
+
+function datasetWithProfile(dataset, companyId, profile) {
+  return {
+    ...dataset,
+    intents: dataset.intents.map((intent) => {
+      if (intent.id !== companyId) return intent;
+
+      return {
+        ...intent,
+        nazev: profile.nazev?.value ?? intent.nazev,
+        predmet: profile.predmet?.value ?? intent.predmet,
+        sidlo: {
+          ...intent.sidlo,
+          adresa: profile.sidlo?.value ?? intent.sidlo?.adresa ?? "",
+        },
+        predpokladany_obrat_rok: Number(profile.predpokladany_obrat_rok?.value ?? intent.predpokladany_obrat_rok ?? 0),
+        plan_zamestnancu: Number(profile.plan_zamestnancu?.value ?? intent.plan_zamestnancu ?? 0),
+        provozovna: profile.provozovna?.value ? (intent.provozovna ?? { adresa: profile.sidlo?.value ?? intent.sidlo?.adresa ?? "" }) : null,
+      };
+    }),
+  };
 }

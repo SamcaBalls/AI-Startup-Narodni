@@ -25,6 +25,8 @@ export default function App() {
         question: text,
         document: paper,
         company: state.company.profile,
+        agentRun: state.agentRun,
+        baselineRun: state.baselineRun,
       });
       dispatch({
         type: "PUSH_MESSAGE",

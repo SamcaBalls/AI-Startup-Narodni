@@ -68,6 +68,47 @@ const SOURCE_BY_CODE = {
   ZIVNOST_KONCESE: ["lookup_registry:zivnost", "klasifikace_zivnosti.json"],
 };
 
+export const DEFAULT_LEGAL_EVIDENCE = {
+  OR_ZAPIS: [
+    legalSource("90/2012 Sb.", "Zakon o obchodnich korporacich", "zalozeni a vznik obchodni korporace", "https://www.zakonyprolidi.cz/cs/2012-90"),
+    legalSource("304/2013 Sb.", "Zakon o verejnych rejstricich pravnickych a fyzickych osob", "obchodni rejstrik", "https://www.zakonyprolidi.cz/cs/2013-304"),
+  ],
+  DPPO: [
+    legalSource("586/1992 Sb.", "Zakon o danich z prijmu", "dan z prijmu pravnickych osob", "https://www.zakonyprolidi.cz/cs/1992-586"),
+  ],
+  DATOVKA: [
+    legalSource("300/2008 Sb.", "Zakon o elektronickych ukonech a autorizovane konverzi dokumentu", "datove schranky pravnickych osob", "https://www.zakonyprolidi.cz/cs/2008-300"),
+  ],
+  ZIVNOST_VOLNA: [
+    legalSource("455/1991 Sb.", "Zivnostensky zakon", "ohlasovaci zivnosti a druhy zivnosti", "https://www.zakonyprolidi.cz/cs/1991-455"),
+  ],
+  ZIVNOST_VAZANA: [
+    legalSource("455/1991 Sb.", "Zivnostensky zakon", "vazane zivnosti a odborna zpusobilost", "https://www.zakonyprolidi.cz/cs/1991-455"),
+  ],
+  ZIVNOST_KONCESE: [
+    legalSource("455/1991 Sb.", "Zivnostensky zakon", "koncesovane zivnosti", "https://www.zakonyprolidi.cz/cs/1991-455"),
+  ],
+  SIDLO_OZNACENI: [
+    legalSource("455/1991 Sb.", "Zivnostensky zakon", "oznaceni objektu, v nemz ma podnikatel sidlo", "https://www.zakonyprolidi.cz/cs/1991-455"),
+  ],
+  SKUTECNI_MAJITELE: [
+    legalSource("37/2021 Sb.", "Zakon o evidenci skutecnych majitelu", "evidence skutecnych majitelu", "https://www.zakonyprolidi.cz/cs/2021-37"),
+  ],
+  DPH: [
+    legalSource("235/2004 Sb.", "Zakon o dani z pridane hodnoty", "registrace k DPH a obrat", "https://www.zakonyprolidi.cz/cs/2004-235"),
+  ],
+  ZAM_CSSZ: [
+    legalSource("589/1992 Sb.", "Zakon o pojistnem na socialni zabezpeceni a prispevku na statni politiku zamestnanosti", "zamestnavatel a pojistne", "https://www.zakonyprolidi.cz/cs/1992-589"),
+    legalSource("187/2006 Sb.", "Zakon o nemocenskem pojisteni", "ucast zamestnancu na nemocenskem pojisteni", "https://www.zakonyprolidi.cz/cs/2006-187"),
+  ],
+  ZAM_ZP: [
+    legalSource("592/1992 Sb.", "Zakon o pojistnem na verejne zdravotni pojisteni", "odvod pojistneho zamestnavatelem", "https://www.zakonyprolidi.cz/cs/1992-592"),
+  ],
+  PROVOZOVNA: [
+    legalSource("455/1991 Sb.", "Zivnostensky zakon", "provozovna, oznameni a oznaceni provozovny", "https://www.zakonyprolidi.cz/cs/1991-455"),
+  ],
+};
+
 export function normalizeDataset(dataset) {
   return {
     intents: dataset.intents ?? dataset.zamery ?? dataset.zamery_firem ?? [],
@@ -75,6 +116,7 @@ export function normalizeDataset(dataset) {
     classifications: dataset.classifications ?? dataset.klasifikace_zivnosti ?? {},
     catalog: dataset.catalog ?? dataset.katalog_povinnosti ?? {},
     ares: dataset.ares ?? dataset.registr_ares ?? {},
+    legalEvidence: dataset.legalEvidence ?? dataset.pravni_zdroje ?? DEFAULT_LEGAL_EVIDENCE,
   };
 }
 
@@ -107,7 +149,7 @@ export function createBaselineRun(companyId, dataset) {
     type: "baseline",
     companyId,
     obligationCodes,
-    obligations: obligationCodes.map((code) => createObligation(code, data.catalog, { baseline: true })),
+    obligations: obligationCodes.map((code) => createObligation(code, data.catalog, { baseline: true, legalEvidence: data.legalEvidence })),
     toolCalls: [
       {
         tool: "baseline_wizard",
@@ -185,8 +227,12 @@ export function createAgentRun(companyId, dataset) {
     toolCalls.push({
       tool: "lookup_legislation",
       args: { tema: "dph" },
-      resultSummary: "Placeholder: pro produkci ověřit aktuální zákonný práh a znění.",
-      result: { tema: "dph", poznamka: "Sandbox používá modelový práh pro demo." },
+      resultSummary: "Demo opora: DPH vychazi ze zakona o dani z pridane hodnoty; pro produkci overit aktualni zneni.",
+      result: {
+        tema: "dph",
+        poznamka: "Sandbox pouziva modelovy prah pro demo.",
+        legalEvidence: legalEvidenceFor("DPH", data.legalEvidence),
+      },
     });
 
     const scheduleResult = {
@@ -206,6 +252,7 @@ export function createAgentRun(companyId, dataset) {
   const obligationCodes = orderCodes([...codes]);
   const obligations = obligationCodes.map((code) =>
     createObligation(code, data.catalog, {
+      legalEvidence: data.legalEvidence,
       scheduled: scheduled.some((item) => item.povinnost === code),
       status: scheduled.some((item) => item.povinnost === code) ? "naplanovano" : "ceka_na_schvaleni",
     }),
@@ -298,10 +345,26 @@ function createObligation(code, catalog, options = {}) {
     timing: TIMING_BY_CODE[code] ?? "ted",
     reason: SHORT_REASON_BY_CODE[code] ?? "Povinnost vznikla z pravidel sandbox datasetu.",
     sources: SOURCE_BY_CODE[code] ?? ["rule.sandbox"],
+    legalEvidence: legalEvidenceFor(code, options.legalEvidence),
     confidence: options.baseline ? "nizka" : "vysoka",
     requiresHumanApproval: !options.baseline,
     scheduled: Boolean(options.scheduled),
   };
+}
+
+function legalSource(actNumber, actName, sectionHint, sourceUrl) {
+  return {
+    actNumber,
+    actName,
+    sectionHint,
+    sourceUrl,
+    status: "demo_reference",
+    verificationNote: "Pred produkcnim pouzitim overit aktualni zneni a konkretni paragraf.",
+  };
+}
+
+function legalEvidenceFor(code, catalog = DEFAULT_LEGAL_EVIDENCE) {
+  return (catalog?.[code] ?? DEFAULT_LEGAL_EVIDENCE[code] ?? []).map((item) => ({ ...item }));
 }
 
 function scoreCase(actualCodes, expectedCodes = []) {

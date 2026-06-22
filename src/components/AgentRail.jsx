@@ -1,10 +1,15 @@
 const QUICK_ACTIONS = [
   ["Vyplnit z ARES", "Doplň prosím do dokumentu údaje z veřejně známých rejstříků (ARES)."],
+  ["Compliance plán", "Shrň compliance plán pro tuto firmu a řekni, co má být v tomto dokumentu doplněno."],
   ["Zkontrolovat", "Zkontroluj tento dokument a upozorni na chybějící nebo sporné body."],
   ["Poradit", "Poraď mi, na co u tohoto dokumentu nezapomenout."],
 ];
 
 export default function AgentRail({ state, paper, dispatch, assist }) {
+  const agentRun = state.agentRun;
+  const baselineRun = state.baselineRun;
+  const scheduled = agentRun?.scheduled ?? [];
+
   const onSubmit = (event) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -28,6 +33,29 @@ export default function AgentRail({ state, paper, dispatch, assist }) {
           </select>
         </div>
       </div>
+
+      {agentRun && (
+        <section className="agent-summary" aria-label="Compliance plán">
+          <div className="summary-line">
+            <span>Agent</span>
+            <strong>{agentRun.metrics.missedObligations}/{agentRun.metrics.extraObligations}</strong>
+          </div>
+          <div className="summary-line muted">
+            <span>Baseline</span>
+            <strong>{baselineRun?.metrics.missedObligations ?? "?"}/{baselineRun?.metrics.extraObligations ?? "?"}</strong>
+          </div>
+          <div className="obligation-chips">
+            {agentRun.obligationCodes.map((code) => (
+              <span key={code}>{code}</span>
+            ))}
+          </div>
+          {scheduled.length > 0 && (
+            <p className="summary-note">
+              Hlídat v čase: {scheduled.map((item) => item.povinnost).join(", ")}
+            </p>
+          )}
+        </section>
+      )}
 
       <div className="messages">
         {paper ? (
