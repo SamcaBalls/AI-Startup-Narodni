@@ -1,0 +1,14 @@
+{
+  "OR_ZAPIS": "Zapis do obchodniho rejstriku",
+  "DPPO": "Registrace k dani z prijmu pravnickych osob",
+  "DATOVKA": "Zrizeni datove schranky (automaticky)",
+  "ZIVNOST_VOLNA": "Ohlaseni volne zivnosti",
+  "ZIVNOST_VAZANA": "Vazana zivnost (odborna zpusobilost)",
+  "ZIVNOST_KONCESE": "Koncesovana zivnost (koncese)",
+  "SIDLO_OZNACENI": "Oznaceni sidla firmy",
+  "SKUTECNI_MAJITELE": "Zapis do evidence skutecnych majitelu",
+  "DPH": "Registrace k DPH po prekroceni obratu",
+  "ZAM_CSSZ": "Prihlaseni zamestnavatele na CSSZ",
+  "ZAM_ZP": "Oznameni zdravotni pojistovne",
+  "PROVOZOVNA": "Ohlaseni provozovny"
+}

@@ -1,0 +1,148 @@
+[
+  {
+    "id": "FIRMA-0001",
+    "predmet": "Ucetnictvi a danove poradenstvi",
+    "obrat": 531148,
+    "zamestnanci": 0,
+    "provozovna": true,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "PROVOZOVNA",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZIVNOST_VAZANA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine; obor je regulovany (vazana/koncesovana), ne volna zivnost"
+  },
+  {
+    "id": "FIRMA-0002",
+    "predmet": "Provoz e-shopu",
+    "obrat": 4460716,
+    "zamestnanci": 2,
+    "provozovna": false,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPH",
+      "DPPO",
+      "OR_ZAPIS",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZAM_CSSZ",
+      "ZAM_ZP",
+      "ZIVNOST_VOLNA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "obrat prekroci prah, vznikne odlozena povinnost k DPH; planuje zamestnance, vznikaji povinnosti vuci CSSZ a zdravotni pojistovne; povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine"
+  },
+  {
+    "id": "FIRMA-0003",
+    "predmet": "Maloobchod a velkoobchod",
+    "obrat": 538968,
+    "zamestnanci": 0,
+    "provozovna": true,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "PROVOZOVNA",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZIVNOST_VOLNA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine"
+  },
+  {
+    "id": "FIRMA-0004",
+    "predmet": "Vyvoj softwaru a IT sluzby",
+    "obrat": 2085359,
+    "zamestnanci": 1,
+    "provozovna": true,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPH",
+      "DPPO",
+      "OR_ZAPIS",
+      "PROVOZOVNA",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZAM_CSSZ",
+      "ZAM_ZP",
+      "ZIVNOST_VOLNA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "obrat prekroci prah, vznikne odlozena povinnost k DPH; planuje zamestnance, vznikaji povinnosti vuci CSSZ a zdravotni pojistovne; povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine"
+  },
+  {
+    "id": "FIRMA-0005",
+    "predmet": "Marketingove sluzby",
+    "obrat": 894731,
+    "zamestnanci": 4,
+    "provozovna": false,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZAM_CSSZ",
+      "ZAM_ZP",
+      "ZIVNOST_VOLNA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "planuje zamestnance, vznikaji povinnosti vuci CSSZ a zdravotni pojistovne; povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine"
+  },
+  {
+    "id": "FIRMA-0006",
+    "predmet": "Ucetnictvi a danove poradenstvi",
+    "obrat": 718801,
+    "zamestnanci": 2,
+    "provozovna": true,
+    "spravne_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "PROVOZOVNA",
+      "SIDLO_OZNACENI",
+      "SKUTECNI_MAJITELE",
+      "ZAM_CSSZ",
+      "ZAM_ZP",
+      "ZIVNOST_VAZANA"
+    ],
+    "baseline_povinnosti": [
+      "DATOVKA",
+      "DPPO",
+      "OR_ZAPIS",
+      "ZIVNOST_VOLNA"
+    ],
+    "proc_zradne": "planuje zamestnance, vznikaji povinnosti vuci CSSZ a zdravotni pojistovne; povinnost oznacit sidlo se na formular casto zapomene; zapis skutecnych majitelu plati vzdy, ale baseline ho mine; obor je regulovany (vazana/koncesovana), ne volna zivnost"
+  }
+]

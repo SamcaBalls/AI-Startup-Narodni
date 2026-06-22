@@ -1,0 +1,27 @@
+{
+  "id": "FIRMA-0001",
+  "forma": "s.r.o.",
+  "nazev": "Zamer 1 s.r.o.",
+  "predmet": "Ucetnictvi a danove poradenstvi",
+  "sidlo": {
+    "adresa": "Hlavni 92, Ceske Budejovice",
+    "obec": "Ceske Budejovice",
+    "ruian_kod": "988662"
+  },
+  "spolecnici": [
+    {
+      "typ": "PO",
+      "nazev": "Partner Holding 7 s.r.o.",
+      "ico": "28728463"
+    },
+    {
+      "typ": "FO",
+      "statni_prislusnost": "CZ"
+    }
+  ],
+  "predpokladany_obrat_rok": 531148,
+  "plan_zamestnancu": 0,
+  "provozovna": {
+    "adresa": "Provozni 49, Brno"
+  }
+}
