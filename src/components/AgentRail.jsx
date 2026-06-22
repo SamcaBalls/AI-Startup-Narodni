@@ -5,7 +5,7 @@ const QUICK_ACTIONS = [
   ["Poradit", "Poraď mi, na co u tohoto dokumentu nezapomenout."],
 ];
 
-export default function AgentRail({ state, paper, dispatch, assist }) {
+export default function AgentRail({ state, paper, dispatch, assist, agentWorking = false }) {
   const agentRun = state.agentRun;
   const baselineRun = state.baselineRun;
   const scheduled = agentRun?.scheduled ?? [];
@@ -59,11 +59,16 @@ export default function AgentRail({ state, paper, dispatch, assist }) {
 
       <div className="messages">
         {paper ? (
-          paper.messages.map((message, index) => (
-            <p key={index} className={`msg ${message.role}`}>
-              {message.text}
-            </p>
-          ))
+          <>
+            {paper.messages.map((message, index) => (
+              <p key={index} className={`msg ${message.role}`}>
+                {message.text}
+              </p>
+            ))}
+            {agentWorking && (
+              <p className="msg agent working">Agent načítá údaje z profilu, ověřuje compliance plán a připravuje úpravu dokumentu...</p>
+            )}
+          </>
         ) : (
           <p className="empty">Vyberte nebo vytvořte papír, ke kterému se chcete poradit.</p>
         )}
@@ -72,7 +77,7 @@ export default function AgentRail({ state, paper, dispatch, assist }) {
       {paper && (
         <div className="quick-actions">
           {QUICK_ACTIONS.map(([label, prompt]) => (
-            <button key={label} onClick={() => assist(prompt)}>
+            <button key={label} onClick={() => assist(prompt)} disabled={agentWorking}>
               {label}
             </button>
           ))}
@@ -83,9 +88,9 @@ export default function AgentRail({ state, paper, dispatch, assist }) {
         <input
           name="question"
           placeholder={paper ? "Zeptejte se agenta na tento papír…" : "Nejdřív otevřete papír"}
-          disabled={!paper}
+          disabled={!paper || agentWorking}
         />
-        <button disabled={!paper}>Odeslat</button>
+        <button disabled={!paper || agentWorking}>Odeslat</button>
       </form>
     </aside>
   );

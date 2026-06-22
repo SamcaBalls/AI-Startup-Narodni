@@ -851,6 +851,10 @@ button {
   border-bottom-left-radius: 3px;
 }
 
+.msg.working {
+  color: var(--ink-2);
+}
+
 .msg.user {
   align-self: flex-end;
   background: var(--ink);
@@ -1044,6 +1048,11 @@ button {
 .quick-actions button:hover {
   background: var(--surface-2);
   color: var(--ink);
+}
+
+.quick-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .chat-form input:disabled,

@@ -8,6 +8,26 @@ import {
 // The app is a single logged-in company's workspace.
 const COMPANY_ID = "FIRMA-0002";
 
+const DEMO_COMPANY_VALUES = {
+  nazev: "Vltava Market s.r.o.",
+  obecne_zamereni: "E-shop s domácími potřebami",
+  predmet: "Provozování e-shopu s domácími potřebami",
+  sidlo: "Křižíkova 148/34, 186 00 Praha 8 - Karlín",
+  kontaktni_email: "info@vltavamarket.cz",
+  preferovany_kanal: "datová schránka",
+  prvni_mesic_cinnosti: "2026-07",
+  predpokladany_obrat_rok: 4_850_000,
+  plan_zamestnancu: 3,
+  provozovna: false,
+  ucetni_kontakt: "ucetni@vltavamarket.cz",
+  souhlas_registry: true,
+};
+
+const DEMO_PARTNERS = [
+  { typ: "FO", jmeno: "Jan Novák", statni_prislusnost: "CZ", vklad_kc: 5_000 },
+  { typ: "FO", jmeno: "Eva Svobodová", statni_prislusnost: "CZ", vklad_kc: 5_000 },
+];
+
 function newId() {
   return globalThis.crypto?.randomUUID?.() ?? `p-${Math.random().toString(36).slice(2)}`;
 }
@@ -27,14 +47,17 @@ const SEED_PAPERS = [
   seedPaper(
     "Společenská smlouva",
     [
-      "SPOLEČENSKÁ SMLOUVA O ZALOŽENÍ SPOLEČNOSTI S RUČENÍM OMEZENÝM",
+      "NÁVRH SPOLEČENSKÉ SMLOUVY",
       "",
-      "1. Obchodní firma: [doplnit]",
-      "2. Sídlo: [doplnit]",
-      "3. Předmět podnikání: [doplnit]",
-      "4. Společníci a jejich vklady: [doplnit]",
-      "5. Výše základního kapitálu: [doplnit]",
-      "6. Jednatel: [doplnit]",
+      "Společnost: Vltava Market s.r.o.",
+      "Sídlo: Křižíkova 148/34, 186 00 Praha 8 - Karlín",
+      "",
+      "Článek I. Firma a sídlo",
+      "1. Zakladatelé se dohodli na založení společnosti s ručením omezeným.",
+      "2. Obchodní firma, přesné vymezení předmětu podnikání, vklady a jednatel budou doplněny z dostupných údajů.",
+      "",
+      "Článek II. Předmět podnikání",
+      "Předmět podnikání bude navázán na živnostenské oprávnění a kontrolu compliance plánu.",
       "",
       "Pracovní návrh.",
     ].join("\n"),
@@ -64,7 +87,7 @@ const SEED_PAPERS = [
 ];
 
 export function createInitialState(dataset) {
-  const profile = createCompanyProfile(COMPANY_ID, dataset);
+  const profile = applyDemoCompanyProfile(createCompanyProfile(COMPANY_ID, dataset));
   const runtimeDataset = datasetWithProfile(dataset, COMPANY_ID, profile);
 
   return {
@@ -158,6 +181,15 @@ export function reducer(state, action) {
   }
 }
 
+function applyDemoCompanyProfile(profile) {
+  return Object.fromEntries(
+    Object.entries(profile).map(([key, field]) => [
+      key,
+      key in DEMO_COMPANY_VALUES ? { ...field, value: DEMO_COMPANY_VALUES[key], source: "ares-demo" } : field,
+    ]),
+  );
+}
+
 function datasetWithProfile(dataset, companyId, profile) {
   return {
     ...dataset,
@@ -174,6 +206,7 @@ function datasetWithProfile(dataset, companyId, profile) {
         },
         predpokladany_obrat_rok: Number(profile.predpokladany_obrat_rok?.value ?? intent.predpokladany_obrat_rok ?? 0),
         plan_zamestnancu: Number(profile.plan_zamestnancu?.value ?? intent.plan_zamestnancu ?? 0),
+        spolecnici: DEMO_PARTNERS,
         provozovna: profile.provozovna?.value ? (intent.provozovna ?? { adresa: profile.sidlo?.value ?? intent.sidlo?.adresa ?? "" }) : null,
       };
     }),

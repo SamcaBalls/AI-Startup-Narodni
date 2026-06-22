@@ -1,3 +1,5 @@
+export const DEMO_PAPER_EDIT_DELAY_MS = 1600;
+
 export function createDemoPaperEdit({ question, document, company, intent, agentRun }) {
   if (!isDemoFillRequest(question) || !document) return null;
 
@@ -38,11 +40,11 @@ function isDemoFillRequest(question) {
 
 function companyFacts(company = {}, intent = {}, agentRun = {}) {
   return {
-    name: value(company.nazev, intent.nazev ?? "Zamer 2 s.r.o."),
-    address: value(company.sidlo, intent.sidlo?.adresa ?? "Hlavni 181, Brno"),
-    subject: value(company.predmet, intent.predmet ?? "Provoz e-shopu"),
-    turnover: Number(value(company.predpokladany_obrat_rok, intent.predpokladany_obrat_rok ?? 4_460_716)),
-    employees: Number(value(company.plan_zamestnancu, intent.plan_zamestnancu ?? 2)),
+    name: value(company.nazev, intent.nazev ?? "Vltava Market s.r.o."),
+    address: value(company.sidlo, intent.sidlo?.adresa ?? "Křižíkova 148/34, 186 00 Praha 8 - Karlín"),
+    subject: value(company.predmet, intent.predmet ?? "Provozování e-shopu s domácími potřebami"),
+    turnover: Number(value(company.predpokladany_obrat_rok, intent.predpokladany_obrat_rok ?? 4_850_000)),
+    employees: Number(value(company.plan_zamestnancu, intent.plan_zamestnancu ?? 3)),
     hasBranch: Boolean(value(company.provozovna, intent.provozovna)),
     branchAddress: intent.provozovna?.adresa ?? "bez samostatné provozovny",
     partners: formatPartners(intent.spolecnici),
@@ -53,19 +55,41 @@ function companyFacts(company = {}, intent = {}, agentRun = {}) {
 
 function buildFoundingContract(facts) {
   return [
-    "SPOLEČENSKÁ SMLOUVA O ZALOŽENÍ SPOLEČNOSTI S RUČENÍM OMEZENÝM",
+    "SPOLEČENSKÁ SMLOUVA",
+    "o založení společnosti s ručením omezeným",
     "",
-    `1. Obchodní firma: ${facts.name}`,
-    `2. Sídlo: ${facts.address}`,
-    `3. Předmět podnikání: ${facts.subject}`,
-    `4. Společníci a jejich vklady: ${facts.partners}; základní vklad každého společníka 1 000 Kč (demo návrh).`,
-    "5. Výše základního kapitálu: 10 000 Kč",
-    "6. Jednatel: Adam Svoboda, datum narození 12. 3. 1990, bytem Praha (demo údaj k ověření).",
+    "Níže uvedení zakladatelé uzavírají podle zákona o obchodních korporacích tuto společenskou smlouvu.",
     "",
-    "Agent doplnil návrh z veřejně známých údajů a sandbox profilu firmy.",
-    `Navazující compliance plán: ${facts.obligations.join(", ")}.`,
+    "Článek I. Obchodní firma a sídlo",
+    `1. Obchodní firma společnosti je ${trimTrailingPeriod(facts.name)}.`,
+    `2. Sídlem společnosti je ${facts.address}.`,
     "",
-    "Pracovní návrh ke kontrole člověkem.",
+    "Článek II. Předmět podnikání",
+    `1. Předmětem podnikání společnosti je ${facts.subject}.`,
+    `2. Pro účely živnostenského oprávnění agent předběžně vyhodnotil činnost jako ${facts.tradeType}.`,
+    "",
+    "Článek III. Společníci a vklady",
+    `1. Společníky společnosti jsou: ${facts.partners}.`,
+    "2. Základní kapitál společnosti činí 10 000 Kč.",
+    "3. Každý společník splatí svůj peněžitý vklad před podáním návrhu na zápis společnosti do obchodního rejstříku.",
+    "",
+    "Článek IV. Obchodní podíly",
+    "1. Každý společník vlastní obchodní podíl odpovídající poměru jeho vkladu k základnímu kapitálu.",
+    "2. Převod obchodního podílu na jinou osobu vyžaduje souhlas valné hromady.",
+    "",
+    "Článek V. Jednatel",
+    "1. Prvním jednatelem společnosti je Jan Novák, datum narození 14. 5. 1988, bytem Praha.",
+    "2. Jednatel zastupuje společnost samostatně.",
+    "",
+    "Článek VI. Správa vkladu a vznik společnosti",
+    "1. Správcem vkladů je Jan Novák.",
+    "2. Společnost vzniká dnem zápisu do obchodního rejstříku.",
+    "",
+    "Článek VII. Navazující povinnosti",
+    `1. Navazující compliance plán: ${facts.obligations.join(", ")}.`,
+    "2. Před podpisem je nutné ověřit totožnost společníků, souhlas se sídlem, živnostenské oprávnění a finální znění u člověka.",
+    "",
+    "Tento dokument je pracovní návrh připravený pro demo. Není závaznou právní radou.",
   ].join("\n");
 }
 
@@ -104,7 +128,10 @@ function formatPartners(partners = []) {
   return partners
     .map((partner) => {
       if (partner.typ === "PO") return `${partner.nazev}, IČO ${partner.ico}`;
-      return `fyzická osoba, státní příslušnost ${partner.statni_prislusnost ?? "CZ"}`;
+      const name = partner.jmeno ?? "fyzická osoba";
+      const citizenship = partner.statni_prislusnost ?? "CZ";
+      const deposit = partner.vklad_kc ? `, vklad ${formatCzk(partner.vklad_kc)}` : "";
+      return `${name}, státní příslušnost ${citizenship}${deposit}`;
     })
     .join("; ");
 }
@@ -129,4 +156,8 @@ function normalize(valueToNormalize = "") {
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
+}
+
+function trimTrailingPeriod(valueToTrim) {
+  return String(valueToTrim).replace(/\.$/, "");
 }
